@@ -1,6 +1,6 @@
 # Learning-to-Purify-Noisy-Labels-via-Meta-Soft-Label-Corrector
 AAAI'21: Learning to Purify Noisy Labels via Meta Soft Label Corrector(Official Pytorch implementation for noisy labels).
-This is the code for the paper: Learning to Purify Noisy Labels via Meta Soft Label Corrector
+This is the code for the paper: Learning to Purify Noisy Labels via Meta Soft Label Corrector \\
 Yichen Wu, Jun Shu, Qi Xie, Qian Zhao, Deyu Meng* To be presented at AAAI 2021.
 
 

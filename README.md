@@ -24,7 +24,7 @@ The requiring environment is as bellow:
 - Torchvision 0.2.0
 
 
-## Running Meta-Weight-Net on benchmark datasets (CIFAR-10 and CIFAR-100).
+## Running our method on benchmark datasets (CIFAR-10 and CIFAR-100).
 Here is an example:
 ```bash
 python main.py --dataset cifar10 --corruption_type unif(flip2) --corruption_prob 0.6

@@ -289,7 +289,20 @@ def ResNet101(num_classes):
 def ResNet152(num_classes):
     return ResNet(Bottleneck, [3,8,36,3], num_classes)
 
+class VNet(MetaModule):
+    def __init__(self, input, hidden, output):
+        super(VNet, self).__init__()
+        self.linear1 = MetaLinear(input, hidden)
+        self.relu = nn.ReLU(inplace=True)
+        self.linear2 = MetaLinear(hidden, output)
 
+
+
+    def forward(self, x):
+        x = self.linear1(x)
+        x = self.relu(x)
+        out = self.linear2(x)
+        return F.sigmoid(out)
 
 
 

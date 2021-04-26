@@ -24,8 +24,8 @@ import random
 import numpy as np
 #from metrics import *
 
-from wideresnet import VNet
-from resnet import ResNet34
+
+from resnet import ResNet34, VNet
 #from resnet import ResNet32,VNet
 from dataloader import CIFAR10, CIFAR100
 
@@ -226,7 +226,6 @@ def train(train_loader,train_meta_loader,model, vnet,vnet1,optimizer_model,optim
         if epoch < 80:
             y_f = model(input_var)
             probs = F.softmax(y_f,dim=1)
-
             results[indexs.cpu().detach().numpy().tolist()] = probs.cpu().detach().numpy().tolist()
             correct += target_var.eq(targets_true_var).sum().item()
             Loss = F.cross_entropy(y_f, target_var.long())
@@ -281,15 +280,13 @@ def train(train_loader,train_meta_loader,model, vnet,vnet1,optimizer_model,optim
             l1 = torch.sum(cost_v1*l_lambda)/len(cost_v1)
             
             cost2 = F.cross_entropy(y_f_hat, z, reduce=False)
-            cost_v2 = torch.reshape(cost2, (len(cost2), 1))
-            #l2 = torch.sum(cost_v2*(1-l_lambda))/len(cost_v2)     
+            cost_v2 = torch.reshape(cost2, (len(cost2), 1))   
             lambda1 = vnet1(cost_v2.data)
             
             
             current_label = torch.max(y_f_hat,dim=1)[1].cuda()
             cost3 = F.cross_entropy(y_f_hat,current_label,reduce=False)
             cost_v3 = torch.reshape(cost3,(len(cost3),1))
-
             l2 = torch.sum(cost_v2*(lambda1)*(1-l_lambda))/len(cost_v2)+torch.sum(cost_v3*(1-lambda1)*(1-l_lambda))/len(cost_v3)
             l_f_meta = l1 +l2
             
@@ -332,7 +329,7 @@ def train(train_loader,train_meta_loader,model, vnet,vnet1,optimizer_model,optim
             
             cost_w2 = F.cross_entropy(y_f1,torch.max(y_f1,dim=1)[1].cuda(),reduce=False)
             cost_v23 = torch.reshape(cost_w2, (len(cost_w2), 1)) 
-
+            #print(cost_v23)
             with torch.no_grad():
                 w_v = vnet(cost_v21) 
                 w_v2 = vnet1(cost_v22)
@@ -344,6 +341,8 @@ def train(train_loader,train_meta_loader,model, vnet,vnet1,optimizer_model,optim
             
             
             new_pseudolabel = (w_v2*soft_labels.float().cuda())+((1-w_v2)*probs)                    
+            #new_pseudolabel_oh = torch.zeros(inputs.size()[0], num_classes).scatter_(1, new_pseudolabel_hard.cpu().view(-1,1), 1)
+            #results[indexs.cpu().detach().numpy().tolist()] = new_pseudolabel.cpu().detach().numpy().tolist()
             target_var_oh = torch.zeros(inputs.size()[0], num_classes).scatter_(1, targets.view(-1,1), 1)
             new_label = new_pseudolabel.cuda()*(1-w_v.cuda()) + w_v.cuda()*target_var_oh.cuda()
             results[indexs.cpu().detach().numpy().tolist()] = new_label.cpu().detach().numpy().tolist()            
@@ -370,11 +369,7 @@ def train(train_loader,train_meta_loader,model, vnet,vnet1,optimizer_model,optim
                       (meta_loss / (batch_idx + 1)), prec_train, prec_meta))
             if (batch_idx + 1) % 200 == 0:
                test_acc = test(model=model, test_loader=test_loader)
-    train_loader.dataset.label_update(results)
-
-
-    
-
+    train_loader.dataset.label_update(results)    
     
 
 train_loader, train_meta_loader, test_loader = build_dataset()
